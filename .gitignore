@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.venv/
+venv/
+.env
+*.har
+.DS_Store
+.ipynb_checkpoints/
+
+# Personal LLM/agentic planning files
+AGENTS.md
+tasks.md
