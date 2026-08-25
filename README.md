@@ -1,6 +1,8 @@
 # battleship-bot
 
-A battleship bot that is comprised of a CNN that is trained to imitate an exact probabilistic solver, then RL-tuned for **full-game** performance. The post RL-tuning performance is then evaluated at different CNN parameter counts (`1B → 100M → 10M → 1M → 100K → 10K`) as a **pruning study**.
+A battleship bot that is comprised of a CNN that is trained to imitate an exact probabilistic solver, then RL-tuned for **full-game** performance. The post RL-tuning performance is then evaluated at different CNN parameter counts (`1B → 100M → 10M → 1M → 100K → 10K`) as a **pruning study**. Image below from playpager.com
+
+<img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fplaypager.com%2Fapp-images%2Fbattleship%2Fbattleship-game.png&f=1&nofb=1&ipt=dda0cc08407601b238ea5042eaf9c57ff0a81de0f991058ee0b2ea515f250a5e" alt="Battleship Board.">
 
 ## Pipeline overview
 

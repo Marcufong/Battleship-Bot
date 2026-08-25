@@ -1,0 +1,17 @@
+[project]
+name = "battleship-bot"
+version = "0.1.0"
+description = "battleship bot! see README.me for details"
+readme = "README.md"
+authors = [
+    { name = "Marcus Fong", email = "fongmarcus2005@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = []
+
+[project.scripts]
+battleship-bot = "battleship_bot:main"
+
+[build-system]
+requires = ["uv_build>=0.12.1,<0.13.0"]
+build-backend = "uv_build"
