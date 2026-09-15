@@ -16,7 +16,30 @@ Map how pruning a trained Battleship policy down to every smaller size affects *
 ### Phase 0 — Teacher & imitation CNNs
 - `src/gen/`: random legal boards (ships 5/4/3/3/2, no-touch), deterministic seeds; partial-game state generator (board → known misses/hits → training state).
 - `src/solver/`: exact probabilistic targeting solver → imitation targets.
+- `src/game/`: **game simulator** (see spec below) — shared by RL env and eval harness.
 - `src/model/`: train an imitation CNN at each sweep size (warm-start substrate for pruning; no fidelity measurement — downstream turns are the signal).
+
+#### Spec: `src/game/` — game simulator (unscheduled M0 dependency; needed by PPO AND eval)
+- `Game(seed)` class: two 10×10 boards, fleet 5/4/3/3/2, no-touch placement, seeded/deterministic.
+- API: `fire(x, y) -> {miss | hit | sunk(ship) | win}`, `legal_moves()` (un-fired cells), `state()` →
+  board encoding compatible with `src/gen` cell codes (same codes the solver/CNN consume), `T` turn counter.
+- Terminal condition: all 17 ship cells sunk → returns `T` (the headline metric variable).
+- Must support: (a) solver-driven games (target = `solve_batch` pick), (b) CNN-driven games,
+  (c) reset-to-state for PPO batch envs. Both AIs fire alternately; simulator is policy-agnostic.
+- Acceptance: 100 seeded self-play games (solver vs solver) all terminate legally, identical
+  trajectories on identical seeds.
+
+#### Spec: `src/model/nets.py` — parameter-targeted CNN factory
+- `make_net(param_target: int, **kwargs) -> nn.Module` hitting exact param counts for
+  `100M, 10M, 1M, 100K, 10K, 1K, 100` (±small tolerance, asserted at construction).
+- Architecture: conv trunk on 10×10 state planes (from `src/game`/`src/gen` encoding) + policy head
+  (per-cell marginal, matches `solve_batch` label shape `(10,10)`) + value head (scalar, for PPO).
+- Scaling knob: **width-only** (channels), so pruning's width-surgery targets line up layer-by-layer;
+  depth/stride fixed across sizes. Each target maps to a recorded channel config (table in code).
+- Param count is measured on the *trainable dense* weights (post-surgery count after pruning must
+  match the same table → diagonal nets and pruned nets of equal target are shape-identical).
+- Acceptance: assert `abs(count/target − 1) < tol` passes for all 7 sizes; tiny-net (100) path
+  doesn't crash PPO plumbing.
 
 ### Phase 1 — Pruning grid
 - Iterative magnitude pruning (sparsity schedule): each original size → every final size ≤ original. Diagonal = no-op control.
@@ -26,7 +49,7 @@ Map how pruning a trained Battleship policy down to every smaller size affects *
 - PPO on each (original, final) × reward shape; 2–3 seeds per config.
 - Reward shapes:
   - flat: `r = -1/turn` (total = `-T`).
-  - aggressive: `r = -1/turn` + terminal `-λ·T²` (and later a `-λ·exp(T)` variant). λ tuned on the pilot.
+  - aggressive: `r = -1/turn` + terminal `-λ·exp(T)` (λ tuned on pilot; `-λ·T²` removed per 2026-09-11 scope change).
 
 ### Phase 3 — Eval & plots
 - Eval harness: simulate thousands of games/policy; metrics = mean turns + P90/P95.
