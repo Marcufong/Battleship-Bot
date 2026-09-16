@@ -16,7 +16,7 @@ Map how pruning a trained Battleship policy down to every smaller size affects *
 ### Phase 0 — Teacher & imitation CNNs
 - `src/gen/`: random legal boards (ships 5/4/3/3/2, no-touch), deterministic seeds; partial-game state generator (board → known misses/hits → training state).
 - `src/solver/`: exact probabilistic targeting solver → imitation targets.
-- `src/game/`: **game simulator** (see spec below) — shared by RL env and eval harness.
+- `src/game/`: **game simulator** (spec below) — **required dependency for M2 (PPO) and M3 (eval)**, shared by both; build it after M0 training and before any RL.
 - `src/model/`: train an imitation CNN at each sweep size (warm-start substrate for pruning; no fidelity measurement — downstream turns are the signal).
 
 #### Spec: `src/game/` — game simulator (unscheduled M0 dependency; needed by PPO AND eval)

@@ -17,4 +17,7 @@ tasks.md
 data/
 checkpoints/
 results/
-plots/
+logs/
+
+# Training runs
+src/model/run_pilot_m0.sh
