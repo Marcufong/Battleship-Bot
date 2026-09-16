@@ -12,3 +12,9 @@ venv/
 # Personal LLM/agentic planning files
 AGENTS.md
 tasks.md
+
+# Artifacts
+data/
+checkpoints/
+results/
+plots/
